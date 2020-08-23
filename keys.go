@@ -22,7 +22,7 @@ const (
 //
 // See CurrentUserOpenSSHPrivateKeys for more information.
 func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
-	keys, err := FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
+	return FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
 		DirPathFn:    currentUserSSHDirectory,
 		IgnoreKeyErr: func(err error) bool {
 			if keyErr, ok := err.(*IsSSHPrivateKeyError); ok {
@@ -31,7 +31,6 @@ func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 			return false
 		},
 	})
-	return keys, err
 }
 
 // CurrentUserOpenSSHPrivateKeys implements the input for the
