@@ -2,6 +2,14 @@ package sshutil
 
 import "os"
 
+const (
+	ErrorCommandDidNotProduceOutput = "the executed command did not produce any output"
+	ErrorNoKnownHostsFilePresent    = "the known hosts file does not exist"
+	ErrorUnknownHostKey             = "the specified host is not present in the known hosts file"
+	ErrorUploadTimeoutReached       = "upload timeout was exceeded"
+	ErrorUploadCanceled             = "the upload was canceled"
+)
+
 type IsSSHPrivateKeyError struct {
 	FilePath              string
 	UnableToOpen          bool

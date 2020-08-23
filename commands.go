@@ -6,10 +6,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const (
-	ErrorCommandDidNotProduceOutput = "the executed command did not produce any output"
-)
-
 type CommandOptions struct {
 	RequireOutput bool
 	StripNewLine  bool

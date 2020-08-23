@@ -12,11 +12,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const (
-	ErrorUploadTimeoutReached = "upload timeout was exceeded"
-	ErrorUploadCanceled       = "the upload was canceled"
-)
-
 type TransferProgress struct {
 	LocalFileSize  int64
 	RemoteFileSize int64

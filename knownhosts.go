@@ -18,11 +18,6 @@ const (
 	DefaultKnownHostsFileMode = 0600
 )
 
-const (
-	ErrorNoKnownHostsFilePresent = "the known hosts file does not exist"
-	ErrorUnknownHostKey          = "the specified host is not present in the known hosts file"
-)
-
 type SSHHostKeyPromptInfo struct {
 	UserFacingPrompt    string
 	FoundKnownHostsFile bool
