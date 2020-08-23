@@ -103,8 +103,8 @@ func OnlyAllowKnownHostsKeyCallBack(hostname string, remote net.Addr, currentKey
 	return errors.New(ErrorUnknownHostKey)
 }
 
-// AllowAndAddHostKeyCallBack permits any host and adds its key to the known
-// hosts file.
+// AllowAndAddHostKeyCallBack permits any host and adds its public key to the
+// known hosts file.
 func AllowAndAddHostKeyCallBack(hostname string, remote net.Addr, currentKey ssh.PublicKey) error {
 	exists, knownHostsPath, err := GetKnownHostsFile()
 	if err != nil {
