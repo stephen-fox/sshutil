@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"path/filepath"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -147,21 +147,12 @@ func AllowAndAddHostKeyCallBack(hostname string, remote net.Addr, currentKey ssh
 // when the file's path cannot be determined or if the file's mask is not equal
 // to DefaultKnownHostsFileMode.
 func GetKnownHostsFile() (exists bool, filePath string, err error) {
-	homePath := ""
-	switch runtime.GOOS {
-	case "darwin":
-		homePath = os.Getenv("HOME")
-	case "linux":
-		homePath = os.Getenv("HOME")
-	case "windows":
-		homePath = filepath.ToSlash(os.Getenv("USERPROFILE"))
+	sshDirPath, err := currentUserSSHDirectory()
+	if err != nil {
+		return false, "", fmt.Errorf("failed to get user's ssh directory - %w", err)
 	}
 
-	if homePath == "" {
-		return false, "", errors.New(ErrorDeterminingKnownHostsPath)
-	}
-
-	filePath = homePath + "/.ssh/known_hosts"
+	filePath = path.Join(sshDirPath, "known_hosts")
 
 	info, statErr := os.Stat(filePath)
 	if statErr != nil {

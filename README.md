@@ -1,3 +1,9 @@
 # sshutil
-A Go helper library for working with `github.com/pkg/sftp` and
-`golang.org/x/crypto/ssh`.
+
+[![GoDoc][godoc-badge]][godoc]
+
+[godoc-badge]: https://godoc.org/github.com/stephen-fox/sshutil?status.svg
+[godoc]: https://godoc.org/github.com/stephen-fox/sshutil
+
+A Go helper library that provides additional SSH functionality and helper code
+for working with 'github.com/pkg/sftp' and 'golang.org/x/crypto/ssh'.
