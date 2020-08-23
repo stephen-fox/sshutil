@@ -33,10 +33,10 @@ func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 	})
 }
 
-// CurrentUserOpenSSHPrivateKeys implements the input for the
-// ssh.PublicKeysCallback wrapper function. The function itself
-// wraps the FindSSHPrivateKeys function using the default
-// configuration values.
+// CurrentUserOpenSSHPrivateKeys returns the current user's OpenSSH private
+// keys. This function implements the input for the ssh.PublicKeysCallback
+// wrapper function. The function itself wraps the FindSSHPrivateKeys function
+// using the default configuration values.
 //
 // Refer to FindSSHPrivateKeys for more information.
 func CurrentUserOpenSSHPrivateKeys() ([]ssh.Signer, error) {
