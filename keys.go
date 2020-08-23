@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	opensshPrivateKeyPEMLabel = "OPENSSH PRIVATE KEY"
+	OpenSSHPrivateKeyPEMLabel = "OPENSSH PRIVATE KEY"
 )
 
 // CurrentUserUnencryptedOpenSSHPrivateKeys returns only the current user's
@@ -82,7 +82,7 @@ func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
 		}
 
 		filePath := path.Join(sshDirPath, info.Name())
-		privateKey, isPrivateKey, err := IsPathSSHPrivateKey(filePath, opensshPrivateKeyPEMLabel)
+		privateKey, isPrivateKey, err := IsPathSSHPrivateKey(filePath, OpenSSHPrivateKeyPEMLabel)
 		if err != nil {
 			if config.IgnoreKeyErr != nil && config.IgnoreKeyErr(err) {
 				continue
