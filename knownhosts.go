@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -16,11 +15,12 @@ import (
 )
 
 const (
-	DefaultKnownHostsFileMode = 0644
+	DefaultKnownHostsFileMode = 0600
+)
 
-	ErrorDeterminingKnownHostsPath = "failed to determine known hosts file path"
-	ErrorNoKnownHostsFilePresent   = "the known hosts file does not exist"
-	ErrorUnknownHostKey            = "the specified host is not present in the known hosts file"
+const (
+	ErrorNoKnownHostsFilePresent = "the known hosts file does not exist"
+	ErrorUnknownHostKey          = "the specified host is not present in the known hosts file"
 )
 
 type SSHHostKeyPromptInfo struct {
@@ -162,8 +162,8 @@ func GetKnownHostsFile() (exists bool, filePath string, err error) {
 	if runtime.GOOS != "windows" {
 		if info.Mode() > DefaultKnownHostsFileMode {
 			return false, filePath,
-				fmt.Errorf("ssh known hosts file must be private, please run 'chmod %s %s'",
-					strconv.FormatInt(DefaultKnownHostsFileMode, 8), filePath)
+				fmt.Errorf("ssh known hosts file at '%s' file mode must be %o - it is %o",
+					filePath, DefaultKnownHostsFileMode, info.Mode())
 		}
 	}
 
