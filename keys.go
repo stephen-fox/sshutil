@@ -18,9 +18,9 @@ const (
 
 // CurrentUserUnencryptedOpenSSHPrivateKeys returns only the current user's
 // unencrypted OpenSSH private keys. This function implements the input for the
-// ssh.PublicKeysCallback wrapper function
+// ssh.PublicKeysCallback wrapper function.
 //
-// See CurrentUserOpenSSHPrivateKeys for more information.
+// Refer to FindSSHPrivateKeys for more information.
 func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 	return FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
 		DirPathFn:    currentUserSSHDirectory,
@@ -38,7 +38,7 @@ func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 // wraps the FindSSHPrivateKeys function using the default
 // configuration values.
 //
-// See FindSSHPrivateKeys for more information.
+// Refer to FindSSHPrivateKeys for more information.
 func CurrentUserOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 	return FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
 		DirPathFn: currentUserSSHDirectory,
@@ -58,10 +58,11 @@ func (o FindSSHPrivateKeysConfig) Validate() error {
 	return nil
 }
 
-// FindSSHPrivateKeys searches for OpenSSH private keys, parses them, and returns
-// the corresponding ssh.Signers representing them using the specified config.
-// By default, if any of the keys cannot be properly parsed, the function
-// returns a non-nil error and a zero slice of ssh.Signer.
+// FindSSHPrivateKeys searches for OpenSSH private keys, parses them, and
+// returns the corresponding ssh.Signers using the specified config.
+//
+// By default the function returns a non-nil error and a zero slice of
+// ssh.Signer if any of the keys cannot be properly parsed.
 func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
 	sshDirPath, err := config.DirPathFn()
 	if err != nil {
@@ -100,19 +101,21 @@ func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
 }
 
 // IsPathSSHPrivateKey returns a non-nil ssh.Signer, true, and a nil error if
-// the PEM file specified at pemFilePath is an SSH private key according to the
-// specified PEM label.
+// the PEM file specified at pemFilePath with the specified PEM label is an SSH
+// private key.
 //
-// A PEM label is the portion of the PEM '----- BEGIN' header that contains the
-// expected data type. For example, the PEM label of the following header would
-// be 'OPENSSH PRIVATE KEY':
+// A PEM label is the portion of the PEM header that contains the expected data
+// type. For example, the PEM label of the header:
 //	-----BEGIN OPENSSH PRIVATE KEY-----
+//
+// ... would be:
+//	OPENSSH PRIVATE KEY
 //
 // Refer to RFC 7468 for more information: https://tools.ietf.org/html/rfc7468
 //
 // If the file is not an SSH private key, nil ssh.Signer, false, and a nil
 // error are returned. If the file is an SSH private key, but could not be
-// parsed, then nil ssh.Signer, true, and a non-nil error of type
+// parsed, then nil ssh.Signer, false, and a non-nil error of type
 // *IsSSHPrivateKeyError is returned.
 func IsPathSSHPrivateKey(pemFilePath string, label string) (ssh.Signer, bool, error) {
 	f, err := os.Open(pemFilePath)
