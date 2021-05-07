@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -165,9 +166,16 @@ func GetKnownHostsFile() (exists bool, filePath string, err error) {
 	return true, filePath, nil
 }
 
-// IsSSHHostKnown determines if an SSH server is known by the client according to
-// the known hosts file.
-func IsSSHHostKnown(hostPublicKey ssh.PublicKey, hostname string, fileContents []byte) (bool, error) {
+// IsSSHHostKnown determines if an SSH server is known by the client according
+// to the specified known hosts file contents.
+//
+// The targetAddr string can be specified in the following formats:
+//	<hostname>
+//	<hostname>:<port>
+//
+// The reason targetAddr is a string is because that is what the Go SSH library
+// returns to callback functions.
+func IsSSHHostKnown(hostPublicKey ssh.PublicKey, targetAddr string, fileContents []byte) (bool, error) {
 	if fileContents == nil || len(fileContents) == 0 {
 		return false, nil
 	}
@@ -177,25 +185,65 @@ func IsSSHHostKnown(hostPublicKey ssh.PublicKey, hostname string, fileContents [
 		return false, err
 	}
 
+	targetPort := 22
+	targetHostOnly, targetPortStr, splitErr := net.SplitHostPort(targetAddr)
+	if splitErr != nil {
+		targetHostOnly = targetAddr
+	} else {
+		targetPort, err = strconv.Atoi(targetPortStr)
+		if err != nil {
+			return false, fmt.Errorf("failed to parse port number from hostname string - %w", err)
+		}
+	}
+
 	for _, knownHostAddress := range knownHostAddresses {
-		// Super hack because Go forces us to include the port with the
-		// hostname. SSH does not treat <address> and <address>:22 as the
-		// same...
-		if strings.HasSuffix(hostname, ":22") {
-			hostname = strings.TrimSuffix(hostname, ":22")
+		knownHostOnly := knownHostAddress
+		knownPort := 22
+		if strings.Contains(knownHostAddress, "[") {
+			knownHostOnly, knownPort, err = parseCrazyBracketedKnownHostEntry(knownHostAddress)
+			if err != nil {
+				return false, err
+			}
 		}
 
-		if knownHostAddress == hostname {
+		if targetHostOnly == knownHostOnly && targetPort == knownPort {
 			if ssh.FingerprintSHA256(knownHostKey) == ssh.FingerprintSHA256(hostPublicKey) {
 				return true, nil
 			} else {
 				return false, fmt.Errorf("[!!!WARNING!!!] public key for '%s' does not match existing entry in SSH known hosts file. Someone might be doing something evil",
-					hostname)
+					targetAddr)
 			}
 		}
 	}
 
-	return IsSSHHostKnown(hostPublicKey, hostname, rest)
+	return IsSSHHostKnown(hostPublicKey, targetAddr, rest)
+}
+
+// parseCrazyBracketedKnownHostEntry parses known_host entries whose host
+// entry is of the format: [<host>]:<port>.
+//
+// This is terrible. Basically, entries in the SSH known_hosts file that specify
+// a port other than 22 must be surrounded by brackets, followed by a port
+// separator and a number:
+//	[foo.com]:2222
+//
+// Why does the Go SSH library not parse this for us?
+func parseCrazyBracketedKnownHostEntry(hostStrElement string) (string, int, error) {
+	hostStrElement = strings.NewReplacer("[", "", "]", "").Replace(hostStrElement)
+
+	portIndex := strings.LastIndex(hostStrElement, ":")
+	if portIndex < 0 {
+		return "", 0, fmt.Errorf("failed to find port number separator for known hosts entry '%s'",
+			hostStrElement)
+	}
+
+	knownPort, err := strconv.Atoi(hostStrElement[portIndex+1:])
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to parse port number for known hosts entry '%s'- %w",
+			hostStrElement, err)
+	}
+
+	return hostStrElement[0:portIndex], knownPort, nil
 }
 
 // AddHostKeyToKnownHosts adds a host key to the known hosts file.
