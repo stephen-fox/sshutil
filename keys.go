@@ -207,8 +207,7 @@ func ParseSSHPrivateKey(config SSHPrivateKeyConfig) (ssh.Signer, error) {
 
 // GetPrivateKeyPasswordFunc returns a password for the current private key.
 // An error can also be returned if the password could not be retrieved.
-// In such cases, the calling function will respect the failure and return
-// it to the caller.
+// In such cases, the calling function will honor the failure and return.
 type GetPrivateKeyPasswordFunc func() (password string, err error)
 
 // IsPathSSHPrivateKey returns a non-nil ssh.Signer, true, and a nil error if
