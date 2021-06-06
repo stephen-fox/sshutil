@@ -3,6 +3,7 @@ package sshutil
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
@@ -25,8 +26,9 @@ func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 	return FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
 		DirPathFn:      currentUserSSHDirectory,
 		IgnoreKeyErrFn: func(err error) bool {
-			if keyErr, ok := err.(*IsSSHPrivateKeyError); ok {
-				return keyErr.RequiresPassphrase
+			var isKeyErr *IsSSHPrivateKeyError
+			if errors.As(err, &isKeyErr) {
+				return isKeyErr.RequiresPassphrase
 			}
 			return false
 		},
