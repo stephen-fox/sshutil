@@ -52,7 +52,7 @@ type FindSSHPrivateKeysConfig struct {
 
 func (o FindSSHPrivateKeysConfig) Validate() error {
 	if o.DirPathFn == nil {
-		return fmt.Errorf("dir path function cannot be nil")
+		return fmt.Errorf("dir path function is nil")
 	}
 
 	return nil
@@ -64,6 +64,11 @@ func (o FindSSHPrivateKeysConfig) Validate() error {
 // By default the function returns a non-nil error and a zero slice of
 // ssh.Signer if any of the keys cannot be properly parsed.
 func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
+	err := config.Validate()
+	if err != nil {
+		return nil, err
+	}
+
 	sshDirPath, err := config.DirPathFn()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get ssh directory path - %w", err)
