@@ -23,8 +23,8 @@ const (
 // Refer to FindSSHPrivateKeys for more information.
 func CurrentUserUnencryptedOpenSSHPrivateKeys() ([]ssh.Signer, error) {
 	return FindSSHPrivateKeys(FindSSHPrivateKeysConfig{
-		DirPathFn:    currentUserSSHDirectory,
-		IgnoreKeyErr: func(err error) bool {
+		DirPathFn:      currentUserSSHDirectory,
+		IgnoreKeyErrFn: func(err error) bool {
 			if keyErr, ok := err.(*IsSSHPrivateKeyError); ok {
 				return keyErr.RequiresPassphrase
 			}
@@ -52,13 +52,13 @@ type FindSSHPrivateKeysConfig struct {
 	// FindSSHPrivateKeys will stop, and return the error.
 	DirPathFn func() (string, error)
 
-	// IgnoreKeyErr, if specified, will be called if an error
-	// occurs when parsing an SSH private key. The error is passed
-	// to the function. If the function returns true, the error will
+	// IgnoreKeyErrFn, if specified, will be called if an error
+	// occurs when parsing an SSH private key (the error being passed
+	// to the function). If the function returns true, the error will
 	// be ignored and FindSSHPrivateKeys will continue to the next
 	// private key. If it returns false, FindSSHPrivateKeys will
-	// return the error.
-	IgnoreKeyErr func(error) bool
+	// stop parsing keys and return the error.
+	IgnoreKeyErrFn func(error) bool
 
 	// KeysToPassFn is a map of private key file names
 	// (not absolute paths - only the file's name) to corresponding
@@ -76,11 +76,11 @@ func (o FindSSHPrivateKeysConfig) Validate() error {
 	return nil
 }
 
-// FindSSHPrivateKeys searches for OpenSSH private keys, parses them, and
-// returns the corresponding ssh.Signers using the specified config.
+// FindSSHPrivateKeys searches for SSH private keys, parses them, and
+// returns the corresponding []ssh.Signer using the specified config.
 //
 // By default the function returns a non-nil error and a zero slice of
-// ssh.Signer if any of the keys cannot be properly parsed.
+// ssh.Signer if any of the keys cannot be parsed.
 func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
 	err := config.Validate()
 	if err != nil {
@@ -111,7 +111,7 @@ func FindSSHPrivateKeys(config FindSSHPrivateKeysConfig) ([]ssh.Signer, error) {
 			PassFn:   config.KeysToPassFn[info.Name()],
 		})
 		if err != nil {
-			if config.IgnoreKeyErr != nil && config.IgnoreKeyErr(err) {
+			if config.IgnoreKeyErrFn != nil && config.IgnoreKeyErrFn(err) {
 				continue
 			}
 
