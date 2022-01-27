@@ -185,6 +185,10 @@ func IsSSHHostKnown(hostPublicKey ssh.PublicKey, targetAddr string, fileContents
 		return false, err
 	}
 
+	if hostPublicKey.Type() != knownHostKey.Type() {
+		return IsSSHHostKnown(hostPublicKey, targetAddr, rest)
+	}
+
 	targetPort := 22
 	targetHostOnly, targetPortStr, splitErr := net.SplitHostPort(targetAddr)
 	if splitErr != nil {
