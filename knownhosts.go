@@ -214,7 +214,8 @@ func IsSSHHostKnown(hostPublicKey ssh.PublicKey, targetAddr string, fileContents
 			if ssh.FingerprintSHA256(knownHostKey) == ssh.FingerprintSHA256(hostPublicKey) {
 				return true, nil
 			} else {
-				return false, fmt.Errorf("[!!!WARNING!!!] public key for '%s' does not match existing entry in SSH known hosts file. Someone might be doing something evil",
+				return false, fmt.Errorf("[!!!WARNING!!!] public key for '%s' does not match " +
+					"existing entry in SSH known hosts file. Someone might be doing something evil",
 					targetAddr)
 			}
 		}
@@ -243,7 +244,7 @@ func parseCrazyBracketedKnownHostEntry(hostStrElement string) (string, int, erro
 
 	knownPort, err := strconv.Atoi(hostStrElement[portIndex+1:])
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to parse port number for known hosts entry '%s'- %w",
+		return "", 0, fmt.Errorf("failed to parse port number for known hosts entry '%s' - %w",
 			hostStrElement, err)
 	}
 
